@@ -1,0 +1,12 @@
+httpserver:
+    port: 8000
+    query: 'path'
+    selector: 'selector'
+    output: 'ouput'
+domain: 'https://pepperreport.io/'
+aws:
+  id: ''
+  secret: ''
+  token: ''
+  bucket: ''
+  region: 'eu-central-1'
