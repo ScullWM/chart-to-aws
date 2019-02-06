@@ -2,6 +2,14 @@
 
 Microservice to generate screenshot from a webpage and upload it to a AWS S3 Bucket.
 
+### Usage
+Simple call with default values using curl:
+`curl http://localhost:8000/\?path\=/mypage/id\&selector\=my_chartjs_id\&output\=screen/my_chartjs_id.png`
+
+Generate a screenshot from a javascript chart
+![](http://www.updemia.com/static/g/b/xl/5c5acbd09a056.png)
+Can be include in email or Slack notification
+
 ### Configuration
 Service can be configured by the config.yaml file. Here's the default values:
 
@@ -27,14 +35,6 @@ Query terms can be updated using the config file.
 `path` is corresponding to the domain path
 `selector` CSS id selector of the element
 `output` Destination of the file in the bucket
-
-### Usage
-Simple call with default values using curl:
-`curl http://localhost:8000/\?path\=/mypage/id\&selector\=my_chartjs_id\&output\=screen/my_chartjs_id.png`
-
-Generate a screenshot from a javascript chart
-![](http://www.updemia.com/static/g/b/xl/5c5acbd09a056.png)
-Can be include in email or Slack notification
 
 
 ### Contribute
