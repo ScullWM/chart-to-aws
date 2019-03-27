@@ -2,10 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"gopkg.in/yaml.v2"
 )
 
 type ScreenConfig struct {
@@ -17,7 +18,7 @@ type ScreenConfig struct {
 	}
 	DomainScope string `yaml:"domain"`
 	Aws         struct {
-		Id     string `yaml:"id"`
+		ID     string `yaml:"id"`
 		Secret string `yaml:"secret"`
 		Token  string `yaml:"token"`
 		Bucket string `yaml:"bucket"`
@@ -47,19 +48,19 @@ func main() {
 	log.Printf("selector term: %s \n", screenConfig.Httpserver.Selector)
 	log.Printf("output term: %s \n", screenConfig.Httpserver.Output)
 
-	http.ListenAndServe(":"+screenConfig.Httpserver.Port, nil)
+	http.ListenAndServe(screenConfig.Httpserver.Port, nil)
 }
 
 func readConfig() (*ScreenConfig, error) {
 	config := &ScreenConfig{}
 
-	if err := YamlUnmarshal("./config.yaml", config); err != nil {
+	if err := yamlUnmarshal("./config.yaml", config); err != nil {
 		return nil, err
 	}
 	return config, nil
 }
 
-func YamlUnmarshal(path string, out interface{}) error {
+func yamlUnmarshal(path string, out interface{}) error {
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
@@ -75,9 +76,15 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	selector := r.URL.Query().Get(screenConfig.Httpserver.Selector)
 	output := r.URL.Query().Get(screenConfig.Httpserver.Output)
 
-	capture(query, selector, output)
+	err := capture(r.Context(), query, selector, output)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	upload(output)
+	err = upload(r.Context(), output)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// json resposne
 	js, err := json.Marshal(ScreenResponse{Bucket: screenConfig.Aws.Bucket, Filepath: output})

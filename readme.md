@@ -16,7 +16,7 @@ Service can be configured by the config.yaml file. Here's the default values:
 
 ```
 httpserver:
-    port: 8000
+    port: '127.0.0.1:8000'
     query: 'path'
     selector: 'selector'
     output: 'ouput'

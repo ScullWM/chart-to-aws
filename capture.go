@@ -1,53 +1,51 @@
 package main
 
 import (
-	"github.com/chromedp/chromedp"
 	"io/ioutil"
+
+	"github.com/chromedp/chromedp"
 
 	"context"
 	"fmt"
-	"log"
 	"time"
 )
 
-func capture(r string, q string, s string) {
+func capture(ctxt context.Context, query string, sel string, out string) error {
 	var err error
-
-	// create context
-	ctxt, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	// create chrome instance
 	c, err := chromedp.New(ctxt)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// run task list
 	var buf []byte
-	url := fmt.Sprintf("%s%s", screenConfig.DomainScope, r)
+	url := fmt.Sprintf("%s%s", screenConfig.DomainScope, query)
 
-	err = c.Run(ctxt, screenshot(url, s, &buf))
+	err = c.Run(ctxt, screenshot(url, sel, &buf))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// shutdown chrome
 	err = c.Shutdown(ctxt)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// wait for chrome to finish
 	err = c.Wait()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	err = ioutil.WriteFile(q, buf, 0644)
+	err = ioutil.WriteFile(out, buf, 0644)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	return nil
 }
 
 func screenshot(urlstr, sel string, res *[]byte) chromedp.Tasks {

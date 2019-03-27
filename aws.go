@@ -1,21 +1,22 @@
 package main
 
 import (
+	"context"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 
 	"bytes"
-	"log"
 	"os"
 )
 
-func upload(p string) {
-	creds := credentials.NewStaticCredentials(screenConfig.Aws.Id, screenConfig.Aws.Secret, screenConfig.Aws.Token)
+func upload(ctxt context.Context, p string) error {
+	creds := credentials.NewStaticCredentials(screenConfig.Aws.ID, screenConfig.Aws.Secret, screenConfig.Aws.Token)
 	_, err := creds.Get()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	cfg := aws.NewConfig().WithRegion(screenConfig.Aws.Region).WithCredentials(creds)
@@ -23,24 +24,28 @@ func upload(p string) {
 
 	file, err := os.Open(p)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer file.Close()
-	fileInfo, _ := file.Stat()
+	fileInfo, err := file.Stat()
+	if err != nil {
+		return err
+	}
+
 	size := fileInfo.Size()
 	buffer := make([]byte, size)
 	fileBytes := bytes.NewReader(buffer)
 
-	file.Read(buffer)
+	_, err = file.Read(buffer)
+	if err != nil {
+		return err
+	}
 
-	params := &s3.PutObjectInput{
+	_, err = svc.PutObjectWithContext(ctxt, &s3.PutObjectInput{
 		Bucket: aws.String(screenConfig.Aws.Bucket),
 		Key:    aws.String(p),
 		Body:   fileBytes,
-	}
+	})
 
-	_, err = svc.PutObject(params)
-	if err != nil {
-		log.Fatal(err)
-	}
+	return err
 }
